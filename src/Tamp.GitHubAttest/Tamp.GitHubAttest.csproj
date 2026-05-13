@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <RootNamespace>Tamp.GitHubAttest</RootNamespace>
+    <AssemblyName>Tamp.GitHubAttest</AssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Package">
+    <PackageId>Tamp.GitHubAttest</PackageId>
+    <Description>Wrapper for `gh attestation` (verify / download / trusted-root) plus the cosign verify-side surface. Covers the SLSA build-provenance side of supply-chain hygiene. Pairs with Tamp.Syft (SBOM = what's inside) for the full "what is it + how was it built" story. Verification only; attestation GENERATION happens via the actions/attest-build-provenance GitHub Action in CI.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(TampCorePath)" Condition="'$(TampCoreMode)' == 'project'" />
+    <PackageReference Include="Tamp.Core" Condition="'$(TampCoreMode)' == 'package'" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>
