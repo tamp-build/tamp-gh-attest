@@ -87,12 +87,28 @@ public static class GhAttest
             };
         }
 
+        // ---- Object-init overloads (TAM-161) ----
+        public static CommandPlan VerifyBlobAttestation(Tool cosignTool, CosignVerifyBlobAttestationSettings settings) => PlanCosign(cosignTool, settings);
+        public static CommandPlan VerifyBlob(Tool cosignTool, CosignVerifyBlobSettings settings) => PlanCosign(cosignTool, settings);
+        public static CommandPlan VerifyAttestation(Tool cosignTool, CosignVerifyAttestationSettings settings) => PlanCosign(cosignTool, settings);
+        public static CommandPlan Verify(Tool cosignTool, CosignVerifySettings settings) => PlanCosign(cosignTool, settings);
+        public static CommandPlan Tree(Tool cosignTool, CosignTreeSettings settings) => PlanCosign(cosignTool, settings);
+        public static CommandPlan Version(Tool cosignTool, CosignVersionSettings settings) => PlanCosign(cosignTool, settings);
+        public static CommandPlan Initialize(Tool cosignTool, CosignInitializeSettings settings) => PlanCosign(cosignTool, settings);
+
         private static CommandPlan RunCosign<T>(Tool tool, Action<T>? configure) where T : CosignSettingsBase, new()
         {
             if (tool is null) throw new ArgumentNullException(nameof(tool));
             var s = new T();
             configure?.Invoke(s);
             return s.ToCommandPlan(tool);
+        }
+
+        private static CommandPlan PlanCosign<T>(Tool tool, T settings) where T : CosignSettingsBase
+        {
+            if (tool is null) throw new ArgumentNullException(nameof(tool));
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+            return settings.ToCommandPlan(tool);
         }
     }
 
@@ -112,11 +128,31 @@ public static class GhAttest
         };
     }
 
+    // ---- Object-init overloads (TAM-161) ----
+    // Parallel surface to the fluent verbs above. Both styles produce identical
+    // CommandPlans; fluent stays canonical in docs and `tamp init` templates.
+    //
+    //     GhAttest.Verify(GhCli, new() { Subject = artifact, Owner = "tamp-build" });
+    //
+    // is equivalent to:
+    //
+    //     GhAttest.Verify(GhCli, s => s.SetSubject(artifact).SetOwner("tamp-build"));
+    public static CommandPlan Verify(Tool ghTool, GhAttestationVerifySettings settings) => Plan(ghTool, settings);
+    public static CommandPlan Download(Tool ghTool, GhAttestationDownloadSettings settings) => Plan(ghTool, settings);
+    public static CommandPlan TrustedRoot(Tool ghTool, GhAttestationTrustedRootSettings settings) => Plan(ghTool, settings);
+
     private static CommandPlan Run<T>(Tool tool, Action<T>? configure) where T : GhAttestationSettingsBase, new()
     {
         if (tool is null) throw new ArgumentNullException(nameof(tool));
         var s = new T();
         configure?.Invoke(s);
         return s.ToCommandPlan(tool);
+    }
+
+    private static CommandPlan Plan<T>(Tool tool, T settings) where T : GhAttestationSettingsBase
+    {
+        if (tool is null) throw new ArgumentNullException(nameof(tool));
+        if (settings is null) throw new ArgumentNullException(nameof(settings));
+        return settings.ToCommandPlan(tool);
     }
 }
